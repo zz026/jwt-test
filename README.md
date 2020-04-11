@@ -1,4 +1,4 @@
-#1 npm i koa-jwt --save
+##1 npm i koa-jwt --save
 	
 	module.export = { SECRET: 'mima!123@10.+gds_' } // 密钥
 
@@ -12,7 +12,7 @@
 		]
 	}))
 
-#2 加密token
+##2 加密token
 	npm i jsonwebtoken --save
 	const jwt = require('jsonwebtoken')
 
@@ -40,7 +40,7 @@
 		}
 	})
 
-#3 解析token
+##3 解析token
 	const util = require('util')
 	const verify = util.promisify(jwt.verify)
 
