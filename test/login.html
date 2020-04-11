@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>用户界面</title>
+	<style>
+		body {
+			padding: 30px;
+			text-align: center;
+		}
+
+		.form {
+			width: 200px;
+			margin: 30px auto;
+		}
+
+		input {
+			display: block;
+			width: 100%;
+			margin-bottom: 20px;
+		}
+		#userInfo {
+			width: 300px;
+			margin: 30px auto;
+			border: 1px solid #ccc;
+			border-radius: 10px;
+			padding: 30px 20px;
+			text-align: left;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="form">
+		<input placeholder="请输入账号" name="userName" type="text" autocomplete="off" />
+		<input placeholder="请输入密码" name="passWord" type="password" autocomplete="off" />
+		<button id="submitBtn">提 交</button>
+	</div>
+	<div id="userInfo">
+		<div style="text-align: center;">暂无信息</div>
+	</div>
+	<button id="logOutBtn">退出登录</button>
+
+	<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcss.com/moment.js/2.24.0/moment.min.js"></script>
+	<script>
+		$(function () {
+			var isLogin = sessionStorage.getItem('token')
+
+			if (isLogin) {
+				getInfo()
+				$('.form').hide()
+			} else {
+				$('#userInfo').hide()
+				$('#logOutBtn').hide()
+			}
+			
+			// 登录
+			$('#submitBtn').on('click', function() {
+				var userName = $('input[name="userName"]').val()
+				var passWord = $('input[name="passWord"]').val()
+				if (!userName || !passWord) {
+					return alert('请输入用户名和密码')
+				}
+				$.ajax({
+					url: 'http://localhost:3000/users/login',
+					data: {
+						userName,
+						passWord
+					},
+					type: 'post',
+					dataType: 'json',
+					success: function (res) {
+						if (res.code === 0) {
+							sessionStorage.setItem('token', 'Bearer ' + res.data.token)
+							getInfo()
+						}
+					},
+					error: function (err) {
+						alert("异常！" + err);
+					}
+				})
+			})
+			// 退出登录
+			$('#logOutBtn').on('click', function() {
+				sessionStorage.removeItem('token')
+				$('#userInfo').html('<div style="text-align: center;">暂无信息</div>')
+				$('#userInfo').hide()
+				$('#logOutBtn').hide()
+				$('.form').show()
+			})
+			// 获取用户详情
+			function getInfo() {
+				var token = sessionStorage.getItem('token')
+				if (!token) { return false }
+				$.ajax({
+					url: 'http://localhost:3000/users/getInfo',
+					headers: {
+						"Authorization": token
+					},
+					success: function (res) {
+						if (res.code === 0) {
+							$('#userInfo').html(
+								'<div>用 户 名：' + res.data.userName + '</div>' + 
+								'<div>登录时间：' + moment(res.data.loginTime).format('YYYY-MM-DD HH:mm:ss') + '</div>'
+							)
+							$('.form').hide()
+							$('#userInfo').show()
+							$('#logOutBtn').show()
+						}
+					},
+				})
+			}
+		})
+	</script>
+
+</body>
+</html>
